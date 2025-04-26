@@ -1,0 +1,2 @@
+C:/Users/kbpri/OneDrive/Desktop/SafeStep/safestep/android/app/.cxx/Debug/2l6h1a2v/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/kbpri/OneDrive/Desktop/SafeStep/safestep/android/app/.cxx/Debug/2l6h1a2v/x86_64/CMakeFiles/rebuild_cache.dir
