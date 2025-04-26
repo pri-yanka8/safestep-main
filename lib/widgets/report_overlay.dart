@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geocoding/geocoding.dart'; // 🆕 import for reverse geocoding
 
 /// A bottom-sheet form that will either create a new report document
 /// or increment an existing one at the same lat/lng.
@@ -18,10 +19,11 @@ class _ReportOverlayState extends State<ReportOverlay> {
 
   final List<String> categories = [
     'Harassment',
-    'Fishy Activity',
+    'Suspicious activity',
     'Stray Dogs',
     'Poor Lighting',
     'Robbery',
+    'Unsafe area',
     'Other',
   ];
 
@@ -84,6 +86,23 @@ class _ReportOverlayState extends State<ReportOverlay> {
                     final lat = widget.latlng.latitude;
                     final lng = widget.latlng.longitude;
 
+                    String readableLocation = "Unknown location";
+
+                    // 🔥 Reverse geocoding to get readable location
+                    try {
+                      List<Placemark> placemarks =
+                          await placemarkFromCoordinates(lat, lng);
+                      print('📍 Placemarks: $placemarks'); // Debug print
+
+                      if (placemarks.isNotEmpty) {
+                        final place = placemarks.first;
+                        readableLocation =
+                            "${place.name ?? ''}, ${place.locality ?? ''}, ${place.administrativeArea ?? ''}";
+                      }
+                    } catch (e) {
+                      print("Reverse geocoding failed: $e");
+                    }
+
                     // 1️⃣ Look for an existing doc at this exact spot
                     final qs = await col
                         .where('latitude', isEqualTo: lat)
@@ -98,6 +117,7 @@ class _ReportOverlayState extends State<ReportOverlay> {
                         'category': selectedCategory,
                         'notes': FieldValue.arrayUnion([notesController.text]),
                         'timestamp': FieldValue.serverTimestamp(),
+                        'location': readableLocation, // <-- 🆕 update location
                       });
                     } else {
                       // 3️⃣ If not found, create new with count = 1
@@ -107,6 +127,7 @@ class _ReportOverlayState extends State<ReportOverlay> {
                         'category': selectedCategory,
                         'notes': [notesController.text],
                         'timestamp': FieldValue.serverTimestamp(),
+                        'location': readableLocation, // <-- 🆕 save location
                         'reportCount': 1,
                       });
                     }

@@ -41,7 +41,6 @@ class CircularGradientMarker extends CustomPainter {
       canvas.drawCircle(center, radius, paint);
     }
 
-    // Draw center circle with solid color
     final centerRadius = maxRadius * 0.3;
     final centerColor = Color.lerp(
       Colors.yellow,
@@ -56,7 +55,6 @@ class CircularGradientMarker extends CustomPainter {
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, 4);
 
     canvas.drawCircle(center, centerRadius, centerPaint);
-
   }
 
   @override

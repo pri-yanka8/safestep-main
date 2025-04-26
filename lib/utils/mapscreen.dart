@@ -17,26 +17,27 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   final MapController _mapController = MapController();
   List<Marker> _markers = [];
-  LatLng? _currentPosition;
+  // LatLng? _currentPosition;
+  final LatLng _initialCenter = LatLng(17.5584280, 78.4511225);
   LatLng? tappedLatLng; // Store tapped location
 
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation();
+    // _getCurrentLocation();
     _listenToReports();
   }
 
-  Future<void> _getCurrentLocation() async {
-    try {
-      Position position = await Geolocator.getCurrentPosition();
-      setState(() {
-        _currentPosition = LatLng(position.latitude, position.longitude);
-      });
-    } catch (e) {
-      print("Error getting location: $e");
-    }
-  }
+  // Future<void> _getCurrentLocation() async {
+  //   try {
+  //     Position position = await Geolocator.getCurrentPosition();
+  //     setState(() {
+  //       _currentPosition = LatLng(position.latitude, position.longitude);
+  //     });
+  //   } catch (e) {
+  //     print("Error getting location: $e");
+  //   }
+  // }
 
   // Listen to real-time reports from Firestore
   void _listenToReports() {
@@ -83,11 +84,9 @@ class _MapScreenState extends State<MapScreen> {
       tappedLatLng = point; // Save the tapped position for the report overlay
     });
 
-    // Show the report overlay when a location is tapped
     _showReportOverlay(point);
   }
 
-  // Show report overlay for submitting report
   void _showReportOverlay(LatLng tappedLatLng) {
     showModalBottomSheet(
       context: context,
@@ -151,12 +150,12 @@ class _MapScreenState extends State<MapScreen> {
     }
 
     if (reportExists && existingReport != null) {
-      // Update existing report
+
       await existingReport.update({
         'reportCount': FieldValue.increment(1),
       });
     } else {
-      // Create new report
+
       await FirebaseFirestore.instance.collection('reports').add({
         'latitude': tappedLatLng!.latitude,
         'longitude': tappedLatLng!.longitude,
@@ -188,14 +187,14 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_currentPosition == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    // if (_currentPosition == null) {
+    //   return const Center(child: CircularProgressIndicator());
+    // }
 
     return FlutterMap(
       mapController: _mapController,
       options: MapOptions(
-        initialCenter: _currentPosition!,
+        initialCenter: _initialCenter,
         initialZoom: 15,
         minZoom: 12,
         maxZoom: 20,
@@ -210,7 +209,7 @@ class _MapScreenState extends State<MapScreen> {
           markers: [
             // Current location marker
             Marker(
-              point: _currentPosition!,
+              point: _initialCenter,
               width: 20,
               height: 20,
               child: Container(
