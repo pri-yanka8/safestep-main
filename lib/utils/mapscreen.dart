@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:geolocator/geolocator.dart';
+// import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:safestep/widgets/circular_gradient_marker.dart';
@@ -18,7 +18,7 @@ class _MapScreenState extends State<MapScreen> {
   final MapController _mapController = MapController();
   List<Marker> _markers = [];
   // LatLng? _currentPosition;
-  final LatLng _initialCenter = LatLng(17.5584280, 78.4511225);
+  final LatLng _initialCenter = const LatLng(17.5584280, 78.4511225);
   LatLng? tappedLatLng; // Store tapped location
 
   @override

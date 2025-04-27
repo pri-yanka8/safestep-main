@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:geocoding/geocoding.dart'; // 🆕 import for reverse geocoding
+import 'package:geocoding/geocoding.dart';
+import 'package:latlong2/latlong.dart' as latlng_lib; // for distance
 
-/// A bottom-sheet form that will either create a new report document
-/// or increment an existing one at the same lat/lng.
 class ReportOverlay extends StatefulWidget {
   final LatLng latlng;
   const ReportOverlay({super.key, required this.latlng});
@@ -16,7 +15,6 @@ class ReportOverlay extends StatefulWidget {
 class _ReportOverlayState extends State<ReportOverlay> {
   String? selectedCategory;
   final notesController = TextEditingController();
-
   final List<String> categories = [
     'Harassment',
     'Suspicious activity',
@@ -28,6 +26,52 @@ class _ReportOverlayState extends State<ReportOverlay> {
   ];
 
   bool _submitting = false;
+  List<String> previousCategories = []; // 🔥 new
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPreviousNearbyReports(); // 🔥 check nearby within 200m
+  }
+
+  Future<void> _fetchPreviousNearbyReports() async {
+    final col = FirebaseFirestore.instance.collection('reports');
+    final lat = widget.latlng.latitude;
+    final lng = widget.latlng.longitude;
+
+    try {
+      final qs = await col.get();
+
+      List<String> foundCategories = [];
+
+      for (var doc in qs.docs) {
+        final data = doc.data();
+        final reportLat = data['latitude'] as double;
+        final reportLng = data['longitude'] as double;
+        final category = data['category'] as String?;
+
+        final tappedPoint = latlng_lib.LatLng(lat, lng);
+        final reportPoint = latlng_lib.LatLng(reportLat, reportLng);
+
+        final distance = const latlng_lib.Distance().as(
+          LengthUnit.Meter,
+          tappedPoint,
+          reportPoint,
+        );
+
+        if (distance <= 200 && category != null) {
+          foundCategories.add(category);
+        }
+      }
+
+      setState(() {
+        previousCategories =
+            foundCategories.toSet().toList(); // remove duplicates
+      });
+    } catch (e) {
+      print('Error fetching nearby previous reports: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +79,7 @@ class _ReportOverlayState extends State<ReportOverlay> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Report this place?',
-        ),
+        Text('Report this place?'),
         const SizedBox(height: 12),
 
         // Category chips
@@ -70,6 +112,18 @@ class _ReportOverlayState extends State<ReportOverlay> {
           maxLines: 3,
         ),
 
+        const SizedBox(height: 12),
+
+        // 🔥 Previously reported for:
+        if (previousCategories.isNotEmpty)
+          Text(
+            "Previously reported for: ${previousCategories.join(', ')}",
+            style: const TextStyle(
+                color: const Color.fromARGB(255, 117, 237, 255),
+                fontStyle: FontStyle.italic,
+                fontSize: 16),
+          ),
+
         const SizedBox(height: 16),
 
         // Submit button
@@ -88,11 +142,9 @@ class _ReportOverlayState extends State<ReportOverlay> {
 
                     String readableLocation = "Unknown location";
 
-                    // 🔥 Reverse geocoding to get readable location
                     try {
                       List<Placemark> placemarks =
                           await placemarkFromCoordinates(lat, lng);
-                      print('📍 Placemarks: $placemarks'); // Debug print
 
                       if (placemarks.isNotEmpty) {
                         final place = placemarks.first;
@@ -103,36 +155,33 @@ class _ReportOverlayState extends State<ReportOverlay> {
                       print("Reverse geocoding failed: $e");
                     }
 
-                    // 1️⃣ Look for an existing doc at this exact spot
+                    // Normal Submit logic
                     final qs = await col
                         .where('latitude', isEqualTo: lat)
                         .where('longitude', isEqualTo: lng)
                         .get();
 
                     if (qs.docs.isNotEmpty) {
-                      // 2️⃣ If found, increment its count
                       final docRef = qs.docs.first.reference;
                       await docRef.update({
                         'reportCount': FieldValue.increment(1),
                         'category': selectedCategory,
                         'notes': FieldValue.arrayUnion([notesController.text]),
                         'timestamp': FieldValue.serverTimestamp(),
-                        'location': readableLocation, // <-- 🆕 update location
+                        'location': readableLocation,
                       });
                     } else {
-                      // 3️⃣ If not found, create new with count = 1
                       await col.add({
                         'latitude': lat,
                         'longitude': lng,
                         'category': selectedCategory,
                         'notes': [notesController.text],
                         'timestamp': FieldValue.serverTimestamp(),
-                        'location': readableLocation, // <-- 🆕 save location
+                        'location': readableLocation,
                         'reportCount': 1,
                       });
                     }
 
-                    // Close sheet after submitting
                     if (mounted) Navigator.pop(context);
                   },
             child: _submitting
