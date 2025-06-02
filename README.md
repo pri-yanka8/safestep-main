@@ -2,7 +2,7 @@ SafeStep – Crowdsourced Safety Alert App
 
 🚨 SafeStep is a real-time safety tracking app that allows users to report unsafe locations and view danger zones on a dynamic heatmap. Designed to empower urban safety, SafeStep helps people stay informed, avoid high-risk areas, and alert emergency contacts with a single tap.
 
-
+---
 
 🚀Features
 
@@ -24,6 +24,7 @@ Displays the user’s current location for accurate map interaction and alerts.
 📞 Emergency Contact Access
 Call your emergency contact instantly from the home screen with one tap.
 
+---
 
 💻Tech Stack
 
@@ -34,3 +35,15 @@ Firebase Firestore – Real-time cloud database
 OpenStreetMap – Custom map with full UI control
 
 Geolocator – For current location and distance logic
+
+---
+
+📌 Future Enhancements
+
+🚨 Auto-alert emergency contact if user enters a danger zone
+
+📦 Report categorization & filtering
+
+📊 Analytics dashboard for NGOs/officials
+
+📱 SMS-based fallback reporting for non-smartphone users
