@@ -1,16 +1,36 @@
-# safestep
+SafeStep – Crowdsourced Safety Alert App
 
-A new Flutter project.
+🚨 SafeStep is a real-time safety tracking app that allows users to report unsafe locations and view danger zones on a dynamic heatmap. Designed to empower urban safety, SafeStep helps people stay informed, avoid high-risk areas, and alert emergency contacts with a single tap.
 
-## Getting Started
 
-This project is a starting point for a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
+🚀Features
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+🗺️ Interactive Safety Map
+Tap anywhere on the map to report unsafe spots like harassment, poor lighting, or suspicious activity.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+🔥 Real-Time Danger Heatmap
+Color intensity on the map increases based on the number and severity of reports.
+
+🔔 Proximity Alerts
+Users are notified if they enter an area with a high danger rating.
+
+📝 Report History
+Users can view and manage all their submitted reports with timestamps and notes.
+
+📍 Live Location
+Displays the user’s current location for accurate map interaction and alerts.
+
+📞 Emergency Contact Access
+Call your emergency contact instantly from the home screen with one tap.
+
+
+💻Tech Stack
+
+Flutter – Cross-platform mobile app framework
+
+Firebase Firestore – Real-time cloud database
+
+OpenStreetMap – Custom map with full UI control
+
+Geolocator – For current location and distance logic
